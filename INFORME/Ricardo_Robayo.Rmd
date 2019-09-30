@@ -1,0 +1,180 @@
+---
+title: "Análisis Exploratorio"
+author: "Ricardo Robayo"
+date: "29/9/2019"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+load("~/Universidad/TESIS 2.0/modelo/tesis final.RData")
+library(tidyverse)
+library(DT)
+```
+
+## Incidencia criminal a nivel provincial
+
+La conducta criminal es estudiada desde los grandes filososfos de la antigua Grecia,
+mismos que atribuyeron la conducta a problemas psicológicos, de alma y entorno.
+
+Aristoteles (437 a.c) enuncia que la pobreza y la miceria son factoes que alientan las conductas no racionales entre humanos, y que estos deben ser castigarlos no por la ejecución
+del mismo acto, sino para que los demás no cometan dicho acto. 
+
+La ciencia que estudia la conducta criminal y los factores que influyen sobre esta tomando distintos enfoques, es la criminalista, no obstante la rama que se fija específicamente es la 
+sociología criminal.
+
+
+
+**Tala resumen de casos criminales contra la vida y propiedad**
+
+
+
+```{r warning=FALSE,message=FALSE, echo=FALSE}
+
+base_final_rural_1[,c("PROVINCIAS","gini_ingresos","Delitos","Muertes")]
+
+```
+
+
+**Distribución espacial**
+
+```{r,warning=FALSE,message=FALSE, echo=FALSE,fig.width=10,fig.height=4}
+provincias_urbano %>% 
+ggplot()+
+  geom_sf(aes(fill = Delitos/(`2017`/1000))) + theme_minimal() + 
+  labs(title = "Distrubución espacial de delitos contra la propiedad", 
+       subtitle = "Por cada mil Habientantes",fill = "Delitos")
+
+```
+```{r,warning=FALSE,message=FALSE, echo=FALSE,fig.width=10,fig.height=4}
+provincias_urbano %>% 
+ggplot()+
+  geom_sf(aes(fill = Muertes/(`2017`/1000))) + theme_minimal() + 
+  labs(title = "Distrubución espacial de delitos contra la vida",
+       subtitle = "Por cada mil Habitantes", fill = "Muertes")
+```
+
+
+## Distribución de variables de interés
+
+Dado que el numero de casos criminales no es un proceso continuo sino discreto, tal como se 
+lo puede observar en las gráficas subsiguientes:
+
+```{r,warning=FALSE,message=FALSE, echo=FALSE,fig.width=10,fig.height=4}
+provincias_urbano %>% 
+ggplot()+
+  geom_histogram(aes(x = Delitos/(`2017`/1000))) + theme_minimal() + 
+  labs(title = "Distrubución espacial de delitos contra la propiedad", 
+       subtitle = "Por cada mil Habientantes") + xlab("Delitos")
+```
+
+```{r,warning=FALSE,message=FALSE, echo=FALSE,fig.width=10,fig.height=4}
+provincias_urbano %>% 
+ggplot()+
+  geom_histogram(aes(x = Muertes/(`2017`/1000))) + theme_minimal() + 
+  labs(title = "Distrubución espacial de delitos contra la vida",
+       subtitle = "Por cada mil Habitantes")  + xlab("Delitos")
+```
+Claramente la distribución de datos se le podría estudiar por medio de una `Distribución Possion`.
+
+
+## Relación de variables 
+
+Dentro de las variables con mayor influencia sobre los delitos destacan:
+
+  1) Desigualdad de Ingresos (Gini)
+  2) Tasa de desempleo
+  3) Tasa de Exito laboral (hombres mayores de 24 años con título de tercer nivel)
+  4) Tasa de Madres como Cabeza de Hogar
+  5) Tasa de Hombres en edad de robar (16-24 años)
+  6) Tasa de Desplazamiento para 2 - 3 - 5 años (recidecia menor a los años mencionados)
+  7) Tasa de pobreza
+  8) Tasa de Población en Minorias (Población no mestiza)
+  
+  
+### Gráficos 
+
+
+```{r,warning=FALSE,message=FALSE, echo=FALSE,fig.width=10,fig.height=4}
+provincias_urbano %>% 
+ggplot(aes(gini_ingresos, Muertes/(`2017`/1000)))+ geom_smooth(se = F)+
+  geom_point() + theme_minimal() + 
+  labs(title = "Distrubución espacial de muertos contra la vida",
+       subtitle = "Por cada mil Habitantes")  + xlab("Gini Ingresos") + ylab("Tasa de Delitos")
+```
+
+
+```{r,warning=FALSE,message=FALSE, echo=FALSE,fig.width=10,fig.height=4}
+provincias_urbano %>% 
+ggplot(aes(gini_ingresos, Delitos/(`2017`/1000)))+ geom_smooth(se = F)+
+  geom_point() + theme_minimal() + 
+  labs(title = "Distrubución espacial de delitos contra la vida",
+       subtitle = "Por cada mil Habitantes")  + xlab("Gini Ingresos") + ylab("Tasa de Delitos")
+```
+
+```{r,warning=FALSE,message=FALSE, echo=FALSE,fig.width=10,fig.height=4}
+provincias_urbano %>% 
+ggplot(aes(prop_edad_delinquir,Delitos/(`2017`/1000) ))+  geom_smooth(se = F)+
+  geom_point() + theme_minimal() + 
+  labs(title = "Distrubución espacial de delitos contra la vida",
+       subtitle = "Por cada mil Habitantes")  + xlab("Tasa de Edada de Delinquir") + ylab("Tasa de Delitos")
+```
+
+```{r,warning=FALSE,message=FALSE, echo=FALSE,fig.width=10,fig.height=4}
+provincias_urbano %>% 
+ggplot(aes(prop_mujer_jefe,Delitos/(`2017`/1000) ))+ geom_smooth(se = F)+
+  geom_point() + theme_minimal() + 
+  labs(title = "Distrubución espacial de delitos contra la vida",
+       subtitle = "Por cada mil Habitantes")  + xlab("Tasa Mujer Cabeza de Hogar")+ ylab("Tasa de Delitos")
+```
+
+```{r,warning=FALSE,message=FALSE, echo=FALSE,fig.width=10,fig.height=4}
+provincias_urbano %>% 
+ggplot(aes(prop_minorias,Delitos/(`2017`/1000) ))+ geom_smooth(se = F)+
+  geom_point() + theme_minimal() + 
+  labs(title = "Distrubución espacial de delitos contra la vida",
+       subtitle = "Por cada mil Habitantes")  + xlab("Tasa de Minorias") + ylab("Tasa de Delitos")
+```
+
+```{r,warning=FALSE,message=FALSE, echo=FALSE,fig.width=10,fig.height=4}
+provincias_urbano %>% 
+ggplot(aes(prop_exito_lab_Educacion,Delitos/(`2017`/1000) ))+ geom_smooth(se = F)+
+  geom_point() + theme_minimal() + 
+  labs(title = "Distrubución espacial de delitos contra la vida",
+       subtitle = "Por cada mil Habitantes")  + xlab("Tasa de Exito laboral")+ ylab("Tasa de Delitos")
+```
+
+
+## Modelamiento
+
+Mediante el uso de un modelo *Possion* busca encontrar la influencia de las variables antes mencionadas sobre la criminalidad. 
+
+```{r,warning=FALSE,message=FALSE, echo=FALSE,out.height=4,out.width=4}
+library(sandwich)
+library(lmtest);m1 <- glm(base_final_urbana_1$Delitos ~ 
+                    base_final_urbana_1$`Desplazamiento 2`+
+                    base_final_urbana_1$prop_pobreza + 
+                    base_final_urbana_1$prop_edad_delinquir+
+                    base_final_urbana_1$prop_mujer_jefe+
+                    base_final_urbana_1$gini_ingresos+
+                    base_final_urbana_1$tasa_desem+
+                    base_final_urbana_1$prop_minorias+
+                    base_final_urbana_1$prop_exito_lab_Educacion+
+                    base_final_urbana_1$densidad_millas+
+                    base_afinal_urbana_1$perca_policial+
+                  #  base_final_urbana_1$proyecion_miles+
+                    offset(log(base_final_urbana_1$`2017`)),
+                  family="quasipoisson");coeftest(m1, vcov = sandwich)
+```
+
+
+
+
+
+
+
+
+
+
